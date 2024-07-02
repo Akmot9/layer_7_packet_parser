@@ -5,3 +5,4 @@ pub mod tls;
 pub mod dhcp;
 pub mod http;
 pub mod modbus;
+pub mod ntp;

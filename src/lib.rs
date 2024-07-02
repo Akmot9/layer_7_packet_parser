@@ -11,6 +11,7 @@ use crate::packet::{
     tls::{parse_tls_packet, TlsPacket},
     http::{parse_http_request, HttpRequest},
     modbus::{parse_modbus_packet, ModbusPacket},
+    ntp::{parse_ntp_packet, NtpPacket},
 };
 
 /// `Layer7Info` represents the possible layer 7 information that can be parsed.
@@ -26,6 +27,8 @@ pub enum Layer7Info {
     HttpRequest(HttpRequest),
     /// Contains parsed Modbus packet information.
     ModbusPacket(ModbusPacket),
+    /// Contains parsed ntp packet informations.
+    NtpPacket(NtpPacket),
     /// Represents absence of layer 7 information.
     None,
 }
@@ -38,6 +41,7 @@ impl fmt::Display for Layer7Info {
             Layer7Info::DhcpPacket(packet) => write!(f, "DHCP Packet: {}", packet),
             Layer7Info::HttpRequest(packet) => write!(f, "HTTP Request: {}",packet),
             Layer7Info::ModbusPacket(packet) => write!(f, "MODBUS Packet: {}", packet),
+            Layer7Info::NtpPacket(packet) => write!(f,"NTP packet {:?}", packet),
             Layer7Info::None => write!(f, "None"),
         }
     }
@@ -122,6 +126,15 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
             layer_7_protocol_infos: Some(Layer7Info::ModbusPacket(modbus_packet)),
         });
     }
+
+if let Ok(ntp_packet) = parse_ntp_packet(packet) {
+    println!("Parsed as NTP packet");
+    return Some(Layer7Infos {
+        layer_7_protocol: "NTP".to_string(),
+        layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
+    });
+}
+
 
     // If no known protocol is identified, return None
     println!("No known protocol found");

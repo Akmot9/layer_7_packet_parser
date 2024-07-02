@@ -65,6 +65,23 @@ fn extract_data(payload: &[u8]) -> Vec<u8> {
     payload[8..].to_vec()
 }
 
+/// Verifies if the protocol identifier is 0x0000
+fn check_protocol_id(protocol_id: u16) -> Result<(), bool> {
+    if protocol_id != 0x0000 {
+        return Err(false);
+    }
+    Ok(())
+}
+
+/// Verifies if the function code is a valid Modbus function code
+fn check_function_code(function_code: u8) -> Result<(), bool> {
+    let valid_function_codes = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0F, 0x10];
+    if !valid_function_codes.contains(&function_code) {
+        return Err(false);
+    }
+    Ok(())
+}
+
 /// Parses a Modbus packet from a given payload.
 ///
 /// # Arguments
@@ -79,9 +96,11 @@ pub fn parse_modbus_packet(payload: &[u8]) -> Result<ModbusPacket, bool> {
     check_minimum_length(payload)?;
     let transaction_id = extract_transaction_id(payload);
     let protocol_id = extract_protocol_id(payload);
+    check_protocol_id(protocol_id)?;
     let length = extract_length(payload);
     let unit_id = extract_unit_id(payload);
     let function_code = extract_function_code(payload);
+    check_function_code(function_code)?;
     let data = extract_data(payload);
 
     Ok(ModbusPacket {
@@ -118,6 +137,20 @@ mod tests {
         let short_payload = vec![0x5A, 0x3C];
         match parse_modbus_packet(&short_payload) {
             Ok(_) => panic!("Expected non-Modbus packet due to short payload"),
+            Err(is_modbus) => assert!(!is_modbus),
+        }
+
+        // Test with an invalid Modbus packet (incorrect protocol id)
+        let invalid_protocol_id_payload = vec![0x5A, 0x3C, 0x00, 0x01, 0x00, 0x06, 0x11, 0x03, 0x02, 0x04, 0x00, 0x01];
+        match parse_modbus_packet(&invalid_protocol_id_payload) {
+            Ok(_) => panic!("Expected non-Modbus packet due to invalid protocol id"),
+            Err(is_modbus) => assert!(!is_modbus),
+        }
+
+        // Test with an invalid Modbus packet (invalid function code)
+        let invalid_function_code_payload = vec![0x5A, 0x3C, 0x00, 0x00, 0x00, 0x06, 0x11, 0xFF, 0x02, 0x04, 0x00, 0x01];
+        match parse_modbus_packet(&invalid_function_code_payload) {
+            Ok(_) => panic!("Expected non-Modbus packet due to invalid function code"),
             Err(is_modbus) => assert!(!is_modbus),
         }
     }

@@ -5,6 +5,7 @@ pub mod packet;
 use std::fmt::{self};
 
 
+
 use crate::packet::{
     dhcp::{parse_dhcp_packet, DhcpPacket},
     dns::{parse_dns_packet, DnsPacket},
@@ -12,6 +13,7 @@ use crate::packet::{
     http::{parse_http_request, HttpRequest},
     modbus::{parse_modbus_packet, ModbusPacket},
     ntp::{parse_ntp_packet, NtpPacket},
+    bitcoin::{parse_bitcoin_packet, BitcoinPacket},
 };
 
 /// `Layer7Info` represents the possible layer 7 information that can be parsed.
@@ -29,6 +31,8 @@ pub enum Layer7Info {
     ModbusPacket(ModbusPacket),
     /// Contains parsed ntp packet informations.
     NtpPacket(NtpPacket),
+    /// Contains parsed Bitcoin packet information.
+    BitcoinPacket(BitcoinPacket),
     /// Represents absence of layer 7 information.
     None,
 }
@@ -42,6 +46,7 @@ impl fmt::Display for Layer7Info {
             Layer7Info::HttpRequest(packet) => write!(f, "HTTP Request: {}",packet),
             Layer7Info::ModbusPacket(packet) => write!(f, "MODBUS Packet: {}", packet),
             Layer7Info::NtpPacket(packet) => write!(f,"NTP packet {:?}", packet),
+            Layer7Info::BitcoinPacket(packet) => write!(f, "Bitcoin Packet: {}", packet),
             Layer7Info::None => write!(f, "None"),
         }
     }
@@ -80,6 +85,11 @@ impl fmt::Display for Layer7Infos {
 /// * `Option<Layer7Infos>` - Returns `Some(Layer7Infos)` if parsing is successful,
 ///   otherwise returns `None`.
 pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
+    if packet.is_empty() {
+        println!("Packet is empty");
+        return None;
+    }
+
     println!("Parsing packet: {:?}", packet);
 
     // Attempt to parse as a TLS packet
@@ -127,19 +137,28 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
         });
     }
 
-if let Ok(ntp_packet) = parse_ntp_packet(packet) {
-    println!("Parsed as NTP packet");
-    return Some(Layer7Infos {
-        layer_7_protocol: "NTP".to_string(),
-        layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
-    });
-}
+    if let Ok(ntp_packet) = parse_ntp_packet(packet) {
+        println!("Parsed as NTP packet");
+        return Some(Layer7Infos {
+            layer_7_protocol: "NTP".to_string(),
+            layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
+        });
+    }
 
+    if let Ok(bitcoin_packet) = parse_bitcoin_packet(packet) {
+        println!("Parsed as Bitcoin packet");
+        return Some(Layer7Infos {
+            layer_7_protocol: "Bitcoin".to_string(),
+            layer_7_protocol_infos: Some(Layer7Info::BitcoinPacket(bitcoin_packet)),
+        });
+    }
 
     // If no known protocol is identified, return None
-    println!("No known protocol found");
+    println!("Unable to parse as any known protocol by the library");
+    
     None
 }
+
 
 #[cfg(test)]
 mod tests {

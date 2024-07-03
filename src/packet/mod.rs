@@ -6,3 +6,4 @@ pub mod dhcp;
 pub mod http;
 pub mod modbus;
 pub mod ntp;
+pub mod bitcoin;

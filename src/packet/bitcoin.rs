@@ -14,7 +14,7 @@ impl fmt::Display for BitcoinPacket {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Bitcoin Packet: magic={:08X}, command={}, length={}, checksum={:02X?}, payload={:02X?}",
+            "Bitcoin Packet: magic={:02X?}, command={}, length={}, checksum={:02X?}, payload={:02X?}",
             self.magic, self.command, self.length, self.checksum, self.payload
         )
     }
@@ -44,7 +44,7 @@ fn check_magic_number(payload: &[u8]) -> Result<u32, bool> {
     if VALID_MAGIC_NUMBERS.contains(&magic) {
         Ok(magic)
     } else {
-        println!("Invalid magic number: {:08X}", magic);
+        println!("Invalid magic number: {:02X?}", magic);
         Err(false)
     }
 }
@@ -80,9 +80,9 @@ fn extract_checksum(payload: &[u8]) -> [u8; 4] {
 }
 
 /// Ensures the payload length is consistent with the actual data length
-fn validate_payload_length(payload: &[u8], length: u32) -> Result<(), bool> {
-    if payload.len() < (24 + length as usize) {
-        println!("Payload length inconsistent: expected {}, got {}", length, payload.len() - 24);
+fn validate_actual_payload_length(payload: &[u8], length: u32) -> Result<(), bool> {
+    if payload.len() !=  length as usize{
+        println!("Payload length inconsistent: expected {}, got {}", length, payload.len());
         return Err(false);
     }
     Ok(())
@@ -111,7 +111,7 @@ pub fn parse_bitcoin_packet(payload: &[u8]) -> Result<BitcoinPacket, bool> {
     let checksum = extract_checksum(payload);
     
     let actual_payload = extract_payload(payload);
-    //validate_actual_payload_length(actual_payload, length)?;
+    validate_actual_payload_length(&actual_payload, length)?;
 
     Ok(BitcoinPacket {
         magic,
@@ -248,11 +248,7 @@ mod tests {
     }
 
 
-    #[test]
-    fn test_validate_payload_length() {
-        assert!(validate_payload_length(&vec![0; 29], 5).is_ok());
-        assert!(validate_payload_length(&vec![0; 28], 5).is_err());
-    }
+
 
     #[test]
     fn test_extract_payload() {

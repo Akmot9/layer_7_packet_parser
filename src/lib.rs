@@ -90,7 +90,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
         return None;
     }
 
-    println!("Parsing packet: {:?}", packet);
+    println!("Parsing packet: {:02X?}", packet);
 
     // Attempt to parse as a TLS packet
     if let Ok(tls_packet) = parse_tls_packet(packet) {

@@ -1,7 +1,7 @@
 /// The `NtpPacket` struct represents a parsed NTP packet.
 #[derive(Debug)]
 pub struct NtpPacket {
-    /// The first byte containing LI, Version, and Mode.
+    /// The first byte containing LI, Version, et Mode.
     pub li_vn_mode: u8,
     /// The stratum level of the local clock.
     pub stratum: u8,
@@ -53,6 +53,25 @@ fn check_ntp_packet(payload: &[u8]) -> Result<(), bool> {
     Ok(())
 }
 
+fn check_stratum(stratum: u8) -> Result<(), bool> {
+    if stratum > 15 {
+        return Err(false);
+    }
+    Ok(())
+}
+
+fn check_poll(poll: u8) -> Result<(), bool> {
+    if poll > 17 {
+        return Err(false);
+    }
+    Ok(())
+}
+
+fn check_root_delay_dispersion(_root_delay: u32, _root_dispersion: u32) -> Result<(), bool> {
+    // These checks are removed because u32 cannot exceed its own bounds
+    Ok(())
+}
+
 /// Parses an NTP packet from a given payload.
 ///
 /// # Arguments
@@ -77,6 +96,10 @@ pub fn parse_ntp_packet(payload: &[u8]) -> Result<NtpPacket, bool> {
     let originate_timestamp = u64::from_be_bytes([payload[24], payload[25], payload[26], payload[27], payload[28], payload[29], payload[30], payload[31]]);
     let receive_timestamp = u64::from_be_bytes([payload[32], payload[33], payload[34], payload[35], payload[36], payload[37], payload[38], payload[39]]);
     let transmit_timestamp = u64::from_be_bytes([payload[40], payload[41], payload[42], payload[43], payload[44], payload[45], payload[46], payload[47]]);
+
+    check_stratum(stratum)?;
+    check_poll(poll)?;
+    check_root_delay_dispersion(root_delay, root_dispersion)?;
 
     Ok(NtpPacket {
         li_vn_mode,

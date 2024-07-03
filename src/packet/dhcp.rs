@@ -43,6 +43,7 @@ impl fmt::Display for DhcpPacket {
 /// * `Result<DhcpPacket, bool>` - Returns `Ok(DhcpPacket)` if parsing is successful,
 ///   otherwise returns `Err(false)` indicating an invalid DHCP packet.
 pub fn parse_dhcp_packet(payload: &[u8]) -> Result<DhcpPacket, bool> {
+    // Check minimum length
     if payload.len() < 236 {
         return Err(false);
     }
@@ -66,6 +67,17 @@ pub fn parse_dhcp_packet(payload: &[u8]) -> Result<DhcpPacket, bool> {
     file.copy_from_slice(&payload[108..236]);
 
     let options = payload[236..].to_vec();
+
+    // Validate DHCP packet fields
+    if !(op == 1 || op == 2) {
+        return Err(false);
+    }
+    if htype != 1 {
+        return Err(false);
+    }
+    if hlen != 6 {
+        return Err(false);
+    }
 
     Ok(DhcpPacket {
         op,
@@ -135,6 +147,22 @@ mod tests {
         let short_payload = vec![0x01, 0x01, 0x06, 0x00, 0x39, 0x03, 0xF3, 0x26];
         match parse_dhcp_packet(&short_payload) {
             Ok(_) => panic!("Expected invalid DHCP packet due to short payload"),
+            Err(is_dhcp) => assert!(!is_dhcp),
+        }
+    }
+
+    #[test]
+    fn test_parse_dhcp_packet_invalid_op() {
+        let invalid_op_payload = vec![0x03, 0x01, 0x06, 0x00, 0x39, 0x03, 0xF3, 0x26, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x29, 0x36, 0x57, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+            .iter()
+            .cloned()
+            .chain([0x00; 64].iter().cloned())
+            .chain([0x00; 128].iter().cloned())
+            .chain([0x63, 0x82, 0x53, 0x63, 0x35, 0x01, 0x05, 0xFF].iter().cloned())
+            .collect::<Vec<u8>>();
+
+        match parse_dhcp_packet(&invalid_op_payload) {
+            Ok(_) => panic!("Expected invalid DHCP packet due to invalid op code"),
             Err(is_dhcp) => assert!(!is_dhcp),
         }
     }

@@ -99,6 +99,14 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
         });
     }
 
+    if let Ok(ntp_packet) = parse_ntp_packet(packet) {
+        println!("Parsed as NTP packet");
+        return Some(Layer7Infos {
+            layer_7_protocol: "NTP".to_string(),
+            layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
+        });
+    }
+
     // Attempt to parse as a DNS packet
     if let Ok(dns_packet) = parse_dns_packet(packet) {
         println!("Parsed as DNS packet");
@@ -132,14 +140,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
         return Some(Layer7Infos {
             layer_7_protocol: "MODBUS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::ModbusPacket(modbus_packet)),
-        });
-    }
-
-    if let Ok(ntp_packet) = parse_ntp_packet(packet) {
-        println!("Parsed as NTP packet");
-        return Some(Layer7Infos {
-            layer_7_protocol: "NTP".to_string(),
-            layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
         });
     }
 

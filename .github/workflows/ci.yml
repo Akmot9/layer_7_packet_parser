@@ -27,6 +27,9 @@ jobs:
       - name: Install Clippy
         run: rustup component add clippy --toolchain ${{ matrix.toolchain }}
 
+      - name: Install Rustfmt
+        run: rustup component add rustfmt --toolchain ${{ matrix.toolchain }}
+
       - name: Cache Cargo registry
         uses: actions/cache@v2
         with:

@@ -84,15 +84,15 @@ impl fmt::Display for Layer7Infos {
 ///   otherwise returns `None`.
 pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     if packet.is_empty() {
-        println!("Packet is empty");
+        //println!("Packet is empty");
         return None;
     }
 
-    println!("Parsing packet: {:02X?}", packet);
+    //println!("Parsing packet: {:02X?}", packet);
 
     // Attempt to parse as a TLS packet
     if let Ok(tls_packet) = parse_tls_packet(packet) {
-        println!("Parsed as TLS packet");
+        //println!("Parsed as TLS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "TLS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::TlsPacket(tls_packet)),
@@ -100,7 +100,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     if let Ok(ntp_packet) = parse_ntp_packet(packet) {
-        println!("Parsed as NTP packet");
+        //println!("Parsed as NTP packet");
         return Some(Layer7Infos {
             layer_7_protocol: "NTP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
@@ -109,7 +109,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a DNS packet
     if let Ok(dns_packet) = parse_dns_packet(packet) {
-        println!("Parsed as DNS packet");
+        //println!("Parsed as DNS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "DNS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::DnsPacket(dns_packet)),
@@ -118,7 +118,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a DHCP packet
     if let Ok(dhcp_packet) = parse_dhcp_packet(packet) {
-        println!("Parsed as DHCP packet");
+        //println!("Parsed as DHCP packet");
         return Some(Layer7Infos {
             layer_7_protocol: "DHCP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::DhcpPacket(dhcp_packet)),
@@ -127,7 +127,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as an HTTP request
     if let Ok(http_request) = parse_http_request(packet) {
-        println!("Parsed as HTTP request");
+        //println!("Parsed as HTTP request");
         return Some(Layer7Infos {
             layer_7_protocol: "HTTP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::HttpRequest(http_request)),
@@ -136,7 +136,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a Modbus packet
     if let Ok(modbus_packet) = parse_modbus_packet(packet) {
-        println!("Parsed as MODBUS packet");
+        //println!("Parsed as MODBUS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "MODBUS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::ModbusPacket(modbus_packet)),
@@ -144,7 +144,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     if let Ok(bitcoin_packet) = parse_bitcoin_packet(packet) {
-        println!("Parsed as Bitcoin packet");
+        //println!("Parsed as Bitcoin packet");
         return Some(Layer7Infos {
             layer_7_protocol: "Bitcoin".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::BitcoinPacket(bitcoin_packet)),
@@ -152,7 +152,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     // If no known protocol is identified, return None
-    println!("Unable to parse as any known protocol by the library");
+    //println!("Unable to parse as any known protocol by the library");
 
     None
 }

@@ -50,7 +50,7 @@ impl fmt::Display for DnsQuery {
 ///   otherwise returns `Err(false)` indicating an invalid DNS packet.
 pub fn parse_dns_packet(payload: &[u8]) -> Result<DnsPacket, bool> {
     if is_payload_too_short(payload, 12) {
-        println!("Payload too short for DNS packet: len = {}", payload.len());
+        // println!("Payload too short for DNS packet: len = {}", payload.len());
         return Err(false);
     }
 
@@ -93,8 +93,8 @@ fn parse_dns_header(payload: &[u8]) -> Result<DnsHeader, &'static str> {
     let authority_rrs = u16::from_be_bytes([payload[8], payload[9]]);
     let additional_rrs = u16::from_be_bytes([payload[10], payload[11]]);
 
-    println!("Parsed DNS header: transaction_id={:#X}, flags={:#X}, questions={}, answers={}, authority_rrs={}, additional_rrs={}",
-        transaction_id, flags, questions, answers, authority_rrs, additional_rrs);
+    // println!("Parsed DNS header: transaction_id={:#X}, flags={:#X}, questions={}, answers={}, authority_rrs={}, additional_rrs={}",
+    //     transaction_id, flags, questions, answers, authority_rrs, additional_rrs);
 
     if are_record_counts_unreasonable(questions, answers, authority_rrs, additional_rrs) {
         return Err("Unreasonable number of records");
@@ -117,8 +117,8 @@ fn parse_dns_queries(
 ) -> Result<Vec<DnsQuery>, &'static str> {
     let mut queries = Vec::new();
 
-    for i in 0..questions {
-        println!("Parsing query {}/{}", i + 1, questions);
+    for _i in 0..questions {
+        // println!("Parsing query {}/{}", i + 1, questions);
         let (name, new_offset) = match parse_dns_name(payload, offset) {
             Ok(result) => result,
             Err(_) => {
@@ -135,10 +135,10 @@ fn parse_dns_queries(
         let query_type = u16::from_be_bytes([payload[offset], payload[offset + 1]]);
         let query_class = u16::from_be_bytes([payload[offset + 2], payload[offset + 3]]);
         offset += 4;
-        println!(
-            "Parsed query: name={}, query_type={}, query_class={}",
-            name, query_type, query_class
-        );
+        // println!(
+        //     "Parsed query: name={}, query_type={}, query_class={}",
+        //     name, query_type, query_class
+        // );
         queries.push(DnsQuery {
             name,
             query_type,
@@ -174,7 +174,7 @@ fn parse_dns_name(payload: &[u8], mut offset: usize) -> Result<(String, usize), 
         offset += length;
     }
     let name = labels.join(".");
-    println!("Parsed DNS name: {}", name);
+    //println!("Parsed DNS name: {}", name);
     Ok((name, offset))
 }
 

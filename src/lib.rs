@@ -4,16 +4,14 @@ pub mod packet;
 
 use std::fmt::{self};
 
-
-
 use crate::packet::{
+    bitcoin::{parse_bitcoin_packet, BitcoinPacket},
     dhcp::{parse_dhcp_packet, DhcpPacket},
     dns::{parse_dns_packet, DnsPacket},
-    tls::{parse_tls_packet, TlsPacket},
     http::{parse_http_request, HttpRequest},
     modbus::{parse_modbus_packet, ModbusPacket},
     ntp::{parse_ntp_packet, NtpPacket},
-    bitcoin::{parse_bitcoin_packet, BitcoinPacket},
+    tls::{parse_tls_packet, TlsPacket},
 };
 
 /// `Layer7Info` represents the possible layer 7 information that can be parsed.
@@ -43,9 +41,9 @@ impl fmt::Display for Layer7Info {
             Layer7Info::DnsPacket(packet) => write!(f, "DNS Packet: {}", packet),
             Layer7Info::TlsPacket(packet) => write!(f, "TLS Packet: {}", packet),
             Layer7Info::DhcpPacket(packet) => write!(f, "DHCP Packet: {}", packet),
-            Layer7Info::HttpRequest(packet) => write!(f, "HTTP Request: {}",packet),
+            Layer7Info::HttpRequest(packet) => write!(f, "HTTP Request: {}", packet),
             Layer7Info::ModbusPacket(packet) => write!(f, "MODBUS Packet: {}", packet),
-            Layer7Info::NtpPacket(packet) => write!(f,"NTP packet {:?}", packet),
+            Layer7Info::NtpPacket(packet) => write!(f, "NTP packet {:?}", packet),
             Layer7Info::BitcoinPacket(packet) => write!(f, "Bitcoin Packet: {}", packet),
             Layer7Info::None => write!(f, "None"),
         }
@@ -155,10 +153,9 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // If no known protocol is identified, return None
     println!("Unable to parse as any known protocol by the library");
-    
+
     None
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -233,12 +230,23 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, // yiaddr
             0x00, 0x00, 0x00, 0x00, // siaddr
             0x00, 0x00, 0x00, 0x00, // giaddr
-            0x00, 0x0C, 0x29, 0x36, 0x57, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // chaddr
-        ].iter().cloned().chain([0x00; 64].iter().cloned()).chain([0x00; 128].iter().cloned()).chain([
-            0x63, 0x82, 0x53, 0x63, // Magic cookie
-            0x35, 0x01, 0x05, // DHCP message type
-            0xFF, // End option
-        ].iter().cloned()).collect::<Vec<u8>>();
+            0x00, 0x0C, 0x29, 0x36, 0x57, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, // chaddr
+        ]
+        .iter()
+        .cloned()
+        .chain([0x00; 64].iter().cloned())
+        .chain([0x00; 128].iter().cloned())
+        .chain(
+            [
+                0x63, 0x82, 0x53, 0x63, // Magic cookie
+                0x35, 0x01, 0x05, // DHCP message type
+                0xFF, // End option
+            ]
+            .iter()
+            .cloned(),
+        )
+        .collect::<Vec<u8>>();
 
         let result = parse_layer_7_infos(&dhcp_payload);
 
@@ -257,10 +265,19 @@ mod tests {
             assert_eq!(dhcp_packet.yiaddr, [0, 0, 0, 0]);
             assert_eq!(dhcp_packet.siaddr, [0, 0, 0, 0]);
             assert_eq!(dhcp_packet.giaddr, [0, 0, 0, 0]);
-            assert_eq!(dhcp_packet.chaddr, [0x00, 0x0C, 0x29, 0x36, 0x57, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            assert_eq!(
+                dhcp_packet.chaddr,
+                [
+                    0x00, 0x0C, 0x29, 0x36, 0x57, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00
+                ]
+            );
             assert_eq!(dhcp_packet.sname, [0u8; 64]);
             assert_eq!(dhcp_packet.file, [0u8; 128]);
-            assert_eq!(dhcp_packet.options, vec![0x63, 0x82, 0x53, 0x63, 0x35, 0x01, 0x05, 0xFF]);
+            assert_eq!(
+                dhcp_packet.options,
+                vec![0x63, 0x82, 0x53, 0x63, 0x35, 0x01, 0x05, 0xFF]
+            );
         } else {
             panic!("Expected Layer7Info::DhcpPacket");
         }
@@ -270,7 +287,7 @@ mod tests {
     fn test_parse_layer_7_infos_none() {
         let invalid_payload = vec![99, 3, 3, 0, 5, 1, 2, 3, 4, 5]; // Invalid packet
         let result = parse_layer_7_infos(&invalid_payload);
-    
+
         assert!(result.is_none(), "Expected None for invalid packet");
     }
 

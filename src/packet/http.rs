@@ -100,9 +100,18 @@ mod tests {
                 assert_eq!(request.uri, "/index.html");
                 assert_eq!(request.version, "HTTP/1.1");
                 assert_eq!(request.headers.len(), 3);
-                assert_eq!(request.headers[0], ("Host".to_string(), "www.example.com".to_string()));
-                assert_eq!(request.headers[1], ("User-Agent".to_string(), "curl/7.68.0".to_string()));
-                assert_eq!(request.headers[2], ("Accept".to_string(), "*/*".to_string()));
+                assert_eq!(
+                    request.headers[0],
+                    ("Host".to_string(), "www.example.com".to_string())
+                );
+                assert_eq!(
+                    request.headers[1],
+                    ("User-Agent".to_string(), "curl/7.68.0".to_string())
+                );
+                assert_eq!(
+                    request.headers[2],
+                    ("Accept".to_string(), "*/*".to_string())
+                );
                 assert_eq!(request.body, "");
             }
             Err(_) => panic!("Expected HTTP request"),
@@ -118,9 +127,21 @@ mod tests {
                 assert_eq!(request.uri, "/submit");
                 assert_eq!(request.version, "HTTP/1.1");
                 assert_eq!(request.headers.len(), 3);
-                assert_eq!(request.headers[0], ("Host".to_string(), "www.example.com".to_string()));
-                assert_eq!(request.headers[1], ("Content-Type".to_string(), "application/x-www-form-urlencoded".to_string()));
-                assert_eq!(request.headers[2], ("Content-Length".to_string(), "13".to_string()));
+                assert_eq!(
+                    request.headers[0],
+                    ("Host".to_string(), "www.example.com".to_string())
+                );
+                assert_eq!(
+                    request.headers[1],
+                    (
+                        "Content-Type".to_string(),
+                        "application/x-www-form-urlencoded".to_string()
+                    )
+                );
+                assert_eq!(
+                    request.headers[2],
+                    ("Content-Length".to_string(), "13".to_string())
+                );
                 assert_eq!(request.body, "field1=value1");
             }
             Err(_) => panic!("Expected HTTP request with body"),

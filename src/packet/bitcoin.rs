@@ -51,7 +51,9 @@ fn check_magic_number(payload: &[u8]) -> Result<u32, bool> {
 
 /// Checks if the command contains only valid ASCII characters (alphanumeric and null-padded)
 fn is_valid_command(command: &str) -> bool {
-    command.chars().all(|c| c.is_ascii_alphanumeric() || c == '\0')
+    command
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '\0')
 }
 
 /// Extracts the command string from the payload (12 bytes, null-padded ASCII)
@@ -81,8 +83,12 @@ fn extract_checksum(payload: &[u8]) -> [u8; 4] {
 
 /// Ensures the payload length is consistent with the actual data length
 fn validate_actual_payload_length(payload: &[u8], length: u32) -> Result<(), bool> {
-    if payload.len() !=  length as usize{
-        println!("Payload length inconsistent: expected {}, got {}", length, payload.len());
+    if payload.len() != length as usize {
+        println!(
+            "Payload length inconsistent: expected {}, got {}",
+            length,
+            payload.len()
+        );
         return Err(false);
     }
     Ok(())
@@ -109,7 +115,7 @@ pub fn parse_bitcoin_packet(payload: &[u8]) -> Result<BitcoinPacket, bool> {
     let command = extract_command(payload)?;
     let length = extract_length(payload);
     let checksum = extract_checksum(payload);
-    
+
     let actual_payload = extract_payload(payload);
     validate_actual_payload_length(&actual_payload, length)?;
 
@@ -131,7 +137,8 @@ mod tests {
         // Test with a valid payload containing a known checksum
         let payload = vec![
             0xF9, 0xBE, 0xB4, 0xD9, // Magic number (mainnet)
-            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Command ("verack")
+            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, // Command ("verack")
             0x00, 0x00, 0x00, 0x00, // Length (0)
             0x5D, 0xF6, 0xE0, 0xE2, // Checksum (example)
         ];
@@ -145,7 +152,10 @@ mod tests {
         // Test with a payload shorter than required length for checksum extraction
         let payload = vec![0xF9, 0xBE, 0xB4]; // Only 3 bytes, should fail
         let result = std::panic::catch_unwind(|| extract_checksum(&payload));
-        assert!(result.is_err(), "Expected panic due to short payload length");
+        assert!(
+            result.is_err(),
+            "Expected panic due to short payload length"
+        );
     }
 
     /// Tests for the `parse_bitcoin_packet` function.
@@ -155,7 +165,8 @@ mod tests {
         // Test with a valid Bitcoin packet (simplified example)
         let bitcoin_payload = vec![
             0xF9, 0xBE, 0xB4, 0xD9, // Magic number (mainnet)
-            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Command ("verack")
+            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, // Command ("verack")
             0x00, 0x00, 0x00, 0x00, // Length (0)
             0x5D, 0xF6, 0xE0, 0xE2, // Checksum (example)
         ];
@@ -176,12 +187,16 @@ mod tests {
         // Test with an invalid magic number
         let invalid_magic_number = vec![
             0x99, 0xBE, 0xB4, 0xD9, // Invalid magic number
-            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Command ("verack")
+            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, // Command ("verack")
             0x00, 0x00, 0x00, 0x00, // Length (0)
             0x5D, 0xF6, 0xE0, 0xE2, // Checksum (example)
         ];
         match parse_bitcoin_packet(&invalid_magic_number) {
-            Ok(_) => assert!(false,"Expected non-Bitcoin packet due to invalid magic number"),
+            Ok(_) => assert!(
+                false,
+                "Expected non-Bitcoin packet due to invalid magic number"
+            ),
             Err(is_bitcoin) => assert!(!is_bitcoin),
         }
     }
@@ -191,7 +206,7 @@ mod tests {
         // Test with a payload length shorter than 24 bytes
         let short_payload = vec![0xF9, 0xBE, 0xB4]; // Only 3 bytes, should be at least 24
         match parse_bitcoin_packet(&short_payload) {
-            Ok(_) => assert!(false,"Expected non-Bitcoin packet due to short payload"),
+            Ok(_) => assert!(false, "Expected non-Bitcoin packet due to short payload"),
             Err(is_bitcoin) => assert!(!is_bitcoin),
         }
     }
@@ -201,16 +216,15 @@ mod tests {
         // Test with an invalid length (inconsistent with payload length)
         let invalid_length = vec![
             0xF9, 0xBE, 0xB4, 0xD9, // Magic number (mainnet)
-            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Command ("verack")
+            0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, // Command ("verack")
             0x05, 0x00, 0x00, 0x00, // Length (5)
-            
         ];
         match parse_bitcoin_packet(&invalid_length) {
             Ok(_) => assert!(false,"Expected non-Bitcoin packet due to inconsistent length => length of the tested packet: {}", invalid_length.len()),
             Err(is_bitcoin) => assert!(!is_bitcoin),
         }
     }
-
 
     #[test]
     fn test_check_minimum_length() {
@@ -233,33 +247,33 @@ mod tests {
             extract_command(&vec![
                 0xF9, 0xBE, 0xB4, 0xD9, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00
-            ]).unwrap(),
+            ])
+            .unwrap(),
             "verack"
         );
     }
 
     #[test]
     fn test_extract_length() {
-        assert_eq!(extract_length(&vec![
-            0xF9, 0xBE, 0xB4, 0xD9, // Magic number (4 bytes)
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Command (12 bytes)
-            0x05, 0x00, 0x00, 0x00, // Length (4 bytes, little-endian, 5 in this case)
-        ]), 5);
+        assert_eq!(
+            extract_length(&vec![
+                0xF9, 0xBE, 0xB4, 0xD9, // Magic number (4 bytes)
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, // Command (12 bytes)
+                0x05, 0x00, 0x00, 0x00, // Length (4 bytes, little-endian, 5 in this case)
+            ]),
+            5
+        );
     }
-
-
-
 
     #[test]
     fn test_extract_payload() {
         assert_eq!(
             extract_payload(&vec![
-                0xF9, 0xBE, 0xB4, 0xD9, 0x00, 
-                0x00, 0x00, 0x00, 0x00, 0x00, 
-                0x00, 0x00, 0x00, 0x00, 0x00, 
-                0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,
-                0x01, 0x02, 0x03, 0x04, 0x05]),
+                0xF9, 0xBE, 0xB4, 0xD9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04,
+                0x05
+            ]),
             vec![0x01, 0x02, 0x03, 0x04, 0x05]
         );
     }

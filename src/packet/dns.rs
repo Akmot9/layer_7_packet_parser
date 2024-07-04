@@ -50,22 +50,19 @@ impl fmt::Display for DnsQuery {
 ///   otherwise returns `Err(false)` indicating an invalid DNS packet.
 pub fn parse_dns_packet(payload: &[u8]) -> Result<DnsPacket, bool> {
     if is_payload_too_short(payload, 12) {
-        // println!("Payload too short for DNS packet: len = {}", payload.len());
         return Err(false);
     }
 
     let header = match parse_dns_header(payload) {
         Ok(header) => header,
-        Err(e) => {
-            println!("Error parsing DNS header: {}", e);
+        Err(_) => {
             return Err(false);
         }
     };
 
     let queries = match parse_dns_queries(payload, 12, header.questions) {
         Ok(queries) => queries,
-        Err(e) => {
-            println!("Error parsing DNS queries: {}", e);
+        Err(_) => {
             return Err(false);
         }
     };
@@ -81,9 +78,9 @@ pub fn parse_dns_packet(payload: &[u8]) -> Result<DnsPacket, bool> {
     })
 }
 
-fn parse_dns_header(payload: &[u8]) -> Result<DnsHeader, &'static str> {
+fn parse_dns_header(payload: &[u8]) -> Result<DnsHeader, bool> {
     if is_payload_too_short(payload, 12) {
-        return Err("Payload too short to contain a DNS header");
+        return Err(false);
     }
 
     let transaction_id = u16::from_be_bytes([payload[0], payload[1]]);
@@ -93,11 +90,8 @@ fn parse_dns_header(payload: &[u8]) -> Result<DnsHeader, &'static str> {
     let authority_rrs = u16::from_be_bytes([payload[8], payload[9]]);
     let additional_rrs = u16::from_be_bytes([payload[10], payload[11]]);
 
-    // println!("Parsed DNS header: transaction_id={:#X}, flags={:#X}, questions={}, answers={}, authority_rrs={}, additional_rrs={}",
-    //     transaction_id, flags, questions, answers, authority_rrs, additional_rrs);
-
     if are_record_counts_unreasonable(questions, answers, authority_rrs, additional_rrs) {
-        return Err("Unreasonable number of records");
+        return Err(false);
     }
 
     Ok(DnsHeader {
@@ -114,31 +108,26 @@ fn parse_dns_queries(
     payload: &[u8],
     mut offset: usize,
     questions: u16,
-) -> Result<Vec<DnsQuery>, &'static str> {
+) -> Result<Vec<DnsQuery>, bool> {
     let mut queries = Vec::new();
 
     for _i in 0..questions {
-        // println!("Parsing query {}/{}", i + 1, questions);
         let (name, new_offset) = match parse_dns_name(payload, offset) {
             Ok(result) => result,
             Err(_) => {
-                return Err("Failed to parse DNS name");
+                return Err(false);
             }
         };
         offset = new_offset;
         if is_payload_too_short(payload, offset + 4) {
-            return Err("Payload too short after parsing DNS name");
+            return Err(false);
         }
         if name.is_empty() {
-            return Err("DNS name is empty");
+            return Err(false);
         }
         let query_type = u16::from_be_bytes([payload[offset], payload[offset + 1]]);
         let query_class = u16::from_be_bytes([payload[offset + 2], payload[offset + 3]]);
         offset += 4;
-        // println!(
-        //     "Parsed query: name={}, query_type={}, query_class={}",
-        //     name, query_type, query_class
-        // );
         queries.push(DnsQuery {
             name,
             query_type,
@@ -146,7 +135,7 @@ fn parse_dns_queries(
         });
 
         if queries.is_empty() {
-            return Err("queries is empty");
+            return Err(false);
         }
     }
 
@@ -162,19 +151,16 @@ fn parse_dns_name(payload: &[u8], mut offset: usize) -> Result<(String, usize), 
             break;
         }
         if length & 0xC0 == 0xC0 {
-            println!("Compression not supported at offset {}", offset);
             return Err(false); // Compression not supported in this example
         }
         offset += 1;
         if is_payload_too_short(payload, offset + length) {
-            println!("Label length exceeds payload length at offset {}", offset);
             return Err(false);
         }
         labels.push(String::from_utf8_lossy(&payload[offset..offset + length]).to_string());
         offset += length;
     }
     let name = labels.join(".");
-    //println!("Parsed DNS name: {}", name);
     Ok((name, offset))
 }
 
@@ -269,9 +255,9 @@ mod tests {
         let dns_payload = vec![0x10, 0x77, 0x77, 0x77];
         assert!(parse_dns_name(&dns_payload, 0).is_err());
     }
-
+    
     // #[test]
-    // fn test_dns_does_not_parse_ntp_packet() {
+    // fn test_that_parse_dns_does_not_parse_ntp_packet_by_mistake() {
     //     // This is an example NTP packet
     //     let ntp_payload = vec![
     //         0x1B, 0x00, 0x04, 0xFA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x49,

@@ -32,7 +32,7 @@ const VALID_MAGIC_NUMBERS: [u32; 5] = [
 /// Checks if the payload length is at least 24 bytes (minimum length of a Bitcoin packet header)
 fn check_minimum_length(payload: &[u8]) -> Result<(), bool> {
     if payload.len() < 24 {
-        println!("Payload too short: {}", payload.len());
+        // println!("Payload too short: {}", payload.len());
         return Err(false);
     }
     Ok(())
@@ -44,7 +44,7 @@ fn check_magic_number(payload: &[u8]) -> Result<u32, bool> {
     if VALID_MAGIC_NUMBERS.contains(&magic) {
         Ok(magic)
     } else {
-        println!("Invalid magic number: {:02X?}", magic);
+        // println!("Invalid magic number: {:02X?}", magic);
         Err(false)
     }
 }
@@ -66,7 +66,7 @@ fn extract_command(payload: &[u8]) -> Result<String, bool> {
     if is_valid_command(&command_trimmed) {
         Ok(command_trimmed)
     } else {
-        println!("Invalid command: {}", command_trimmed);
+        // println!("Invalid command: {}", command_trimmed);
         Err(false)
     }
 }
@@ -84,11 +84,11 @@ fn extract_checksum(payload: &[u8]) -> [u8; 4] {
 /// Ensures the payload length is consistent with the actual data length
 fn validate_actual_payload_length(payload: &[u8], length: u32) -> Result<(), bool> {
     if payload.len() != length as usize {
-        println!(
-            "Payload length inconsistent: expected {}, got {}",
-            length,
-            payload.len()
-        );
+        // println!(
+        //     "Payload length inconsistent: expected {}, got {}",
+        //     length,
+        //     payload.len()
+        // );
         return Err(false);
     }
     Ok(())

@@ -110,7 +110,11 @@ fn parse_dns_header(payload: &[u8]) -> Result<DnsHeader, &'static str> {
     })
 }
 
-fn parse_dns_queries(payload: &[u8], mut offset: usize, questions: u16) -> Result<Vec<DnsQuery>, &'static str> {
+fn parse_dns_queries(
+    payload: &[u8],
+    mut offset: usize,
+    questions: u16,
+) -> Result<Vec<DnsQuery>, &'static str> {
     let mut queries = Vec::new();
 
     for i in 0..questions {
@@ -178,7 +182,12 @@ fn is_payload_too_short(payload: &[u8], required_length: usize) -> bool {
     payload.len() < required_length
 }
 
-fn are_record_counts_unreasonable(questions: u16, answers: u16, authority_rrs: u16, additional_rrs: u16) -> bool {
+fn are_record_counts_unreasonable(
+    questions: u16,
+    answers: u16,
+    authority_rrs: u16,
+    additional_rrs: u16,
+) -> bool {
     questions > 50 || answers > 50 || authority_rrs > 50 || additional_rrs > 50
 }
 

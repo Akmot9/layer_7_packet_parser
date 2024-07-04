@@ -41,12 +41,12 @@ fn check_ntp_packet(payload: &[u8]) -> Result<(), bool> {
     let mode = li_vn_mode & 0x07;
 
     // Check if version is between 1 and 4
-    if version < 1 || version > 4 {
+    if !(1..=4).contains(&version) {
         return Err(false);
     }
 
     // Check if mode is between 1 and 5
-    if mode < 1 || mode > 5 {
+    if !(1..=5).contains(&mode) {
         return Err(false);
     }
 

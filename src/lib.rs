@@ -1,4 +1,141 @@
-//! Main library file for the project.
+//! # Layer 7 Packet Analyzer
+//! 
+//! This crate provides functionality for parsing and analyzing various Layer 7 (application layer) network protocols. It supports protocols such as DNS, TLS, DHCP, HTTP, Modbus, NTP, and Bitcoin.
+//! 
+//! ## Modules
+//! 
+//! - `packet`: Contains submodules for each supported protocol, each providing parsing functions and data structures for the respective protocol.
+//! 
+//! ## Usage
+//! 
+//! The main function provided by this crate is `parse_layer_7_infos`, which attempts to detect and parse the protocol of a given TCP or UDP payload.
+//! 
+//! ```rust
+//! use parse_layer7::parse_layer_7_infos;
+//! 
+//! fn main() {
+//!     let packet: &[u8] = &[/* raw packet data */];
+//!     match parse_layer_7_infos(packet) {
+//!         Some(info) => println!("Parsed Layer 7 Info: {}", info),
+//!         None => println!("Unable to parse the packet."),
+//!     }
+//! }
+//! ```
+//! 
+//! ## Modules Documentation
+//! 
+//! ### `packet`
+//! 
+//! The `packet` module contains submodules for each supported protocol. Each submodule provides the necessary functions to parse the protocol's packets and the data structures representing the parsed data.
+//! 
+//! ### Example
+//! 
+//! ```rust
+//! use parse_layer7::packet::tls::{parse_tls_packet, TlsPacket};
+//! 
+//! fn main() {
+//!     let tls_packet_data: &[u8] = &[/* raw TLS packet data */];
+//!     match parse_tls_packet(tls_packet_data) {
+//!         Ok(tls_packet) => println!("Parsed TLS Packet: {:?}", tls_packet),
+//!         Err(e) => println!("Failed to parse TLS packet: {}", e),
+//!     }
+//! }
+//! ```
+//! 
+//! ## Structs and Enums
+//! 
+//! ### `Layer7Info`
+//! 
+//! Represents the possible layer 7 information that can be parsed.
+//! 
+//! ```rust
+//! use parse_layer7::packet::{
+//!    bitcoin::{parse_bitcoin_packet, BitcoinPacket},
+//!    dhcp::{parse_dhcp_packet, DhcpPacket},
+//!    dns::{parse_dns_packet, DnsPacket},
+//!    http::{parse_http_request, HttpRequest},
+//!    modbus::{parse_modbus_packet, ModbusPacket},
+//!    ntp::{parse_ntp_packet, NtpPacket},
+//!    tls::{parse_tls_packet, TlsPacket},
+//! };
+//! 
+//! #[derive(Debug)]
+//! pub enum Layer7Info {
+//!     DnsPacket(DnsPacket),
+//!     TlsPacket(TlsPacket),
+//!     DhcpPacket(DhcpPacket),
+//!     HttpRequest(HttpRequest),
+//!     ModbusPacket(ModbusPacket),
+//!     NtpPacket(NtpPacket),
+//!     BitcoinPacket(BitcoinPacket),
+//!     None,
+//! }
+//! ```
+//! 
+//! ### `Layer7Infos`
+//! 
+//! Contains information about the layer 7 protocol and its parsed data.
+//! 
+//! 
+//! # Examples
+//! 
+//! ## Parse a TLS Packet
+//! 
+//! ```rust
+//! use parse_layer7::parse_layer_7_infos;
+//! 
+//! fn main() {
+//!     let tls_payload = vec![22, 3, 3, 0, 5, 1, 2, 3, 4, 5]; // Example TLS payload
+//!     let result = parse_layer_7_infos(&tls_payload);
+//! 
+//!     match result {
+//!         Some(layer_7_infos) => println!("Parsed Info: {}", layer_7_infos),
+//!         None => println!("Failed to parse the packet."),
+//!     }
+//! }
+//! ```
+//! 
+//! ## Parse a DNS Packet
+//! 
+//! ```rust
+//! use parse_layer7::parse_layer_7_infos;
+//! 
+//! fn main() {
+//!     let dns_payload = vec![
+//!         0xdd, 0xc7, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x77, 0x77, 0x77,
+//!         0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01
+//!     ]; // Example DNS payload
+//!     let result = parse_layer_7_infos(&dns_payload);
+//! 
+//!     match result {
+//!         Some(layer_7_infos) => println!("Parsed Info: {}", layer_7_infos),
+//!         None => println!("Failed to parse the packet."),
+//!     }
+//! }
+//! ```
+//! 
+//! ## Test Module
+//! 
+//! The crate includes a `tests` module with tests for various packet types to ensure the correctness of the parsing functions.
+//! 
+//! ```rust
+//! #[cfg(test)]
+//! mod tests {
+//!     use super::*;
+//! 
+//!     #[test]
+//!     fn test_parse_layer_7_infos_tls() {
+//!         // Test code for parsing TLS packets...
+//!     }
+//! 
+//!     #[test]
+//!     fn test_parse_layer_7_infos_dns() {
+//!         // Test code for parsing DNS packets...
+//!     }
+//! 
+//!     // Additional tests...
+//! }
+//! ```
 
 pub mod packet;
 
@@ -15,23 +152,15 @@ use crate::packet::{
 };
 
 /// `Layer7Info` represents the possible layer 7 information that can be parsed.
-#[derive(Debug)] // Deriving the Debug trait
+#[derive(Debug)]
 pub enum Layer7Info {
-    /// Contains parsed DNS packet information.
     DnsPacket(DnsPacket),
-    /// Contains parsed TLS packet information.
     TlsPacket(TlsPacket),
-    /// Contains parsed DHCP packet information.
     DhcpPacket(DhcpPacket),
-    /// Contains parsed HTTP request information.
     HttpRequest(HttpRequest),
-    /// Contains parsed Modbus packet information.
     ModbusPacket(ModbusPacket),
-    /// Contains parsed ntp packet informations.
     NtpPacket(NtpPacket),
-    /// Contains parsed Bitcoin packet information.
     BitcoinPacket(BitcoinPacket),
-    /// Represents absence of layer 7 information.
     None,
 }
 
@@ -51,11 +180,9 @@ impl fmt::Display for Layer7Info {
 }
 
 /// `Layer7Infos` contains information about the layer 7 protocol and its parsed data.
-#[derive(Debug)] // Deriving the Debug trait
+#[derive(Debug)]
 pub struct Layer7Infos {
-    /// The name of the layer 7 protocol (e.g., "TLS", "DNS", "DHCP").
     pub layer_7_protocol: String,
-    /// The parsed information of the layer 7 protocol.
     pub layer_7_protocol_infos: Option<Layer7Info>,
 }
 
@@ -72,7 +199,7 @@ impl fmt::Display for Layer7Infos {
     }
 }
 
-/// Parses the layer 7 information from a given packet.
+/// Tries to detect the protocol of the TCP or UDP payload given.
 ///
 /// # Arguments
 ///
@@ -80,19 +207,14 @@ impl fmt::Display for Layer7Infos {
 ///
 /// # Returns
 ///
-/// * `Option<Layer7Infos>` - Returns `Some(Layer7Infos)` if parsing is successful,
-///   otherwise returns `None`.
+/// * `Option<Layer7Infos>` - Returns `Some(Layer7Infos)` if detection is successful, otherwise returns `None`.
 pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     if packet.is_empty() {
-        //println!("Packet is empty");
         return None;
     }
 
-    //println!("Parsing packet: {:02X?}", packet);
-
     // Attempt to parse as a TLS packet
     if let Ok(tls_packet) = parse_tls_packet(packet) {
-        //println!("Parsed as TLS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "TLS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::TlsPacket(tls_packet)),
@@ -100,7 +222,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     if let Ok(ntp_packet) = parse_ntp_packet(packet) {
-        //println!("Parsed as NTP packet");
         return Some(Layer7Infos {
             layer_7_protocol: "NTP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::NtpPacket(ntp_packet)),
@@ -109,7 +230,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a DNS packet
     if let Ok(dns_packet) = parse_dns_packet(packet) {
-        //println!("Parsed as DNS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "DNS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::DnsPacket(dns_packet)),
@@ -118,7 +238,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a DHCP packet
     if let Ok(dhcp_packet) = parse_dhcp_packet(packet) {
-        //println!("Parsed as DHCP packet");
         return Some(Layer7Infos {
             layer_7_protocol: "DHCP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::DhcpPacket(dhcp_packet)),
@@ -127,7 +246,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as an HTTP request
     if let Ok(http_request) = parse_http_request(packet) {
-        //println!("Parsed as HTTP request");
         return Some(Layer7Infos {
             layer_7_protocol: "HTTP".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::HttpRequest(http_request)),
@@ -136,7 +254,6 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
 
     // Attempt to parse as a Modbus packet
     if let Ok(modbus_packet) = parse_modbus_packet(packet) {
-        //println!("Parsed as MODBUS packet");
         return Some(Layer7Infos {
             layer_7_protocol: "MODBUS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::ModbusPacket(modbus_packet)),
@@ -144,15 +261,11 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     if let Ok(bitcoin_packet) = parse_bitcoin_packet(packet) {
-        //println!("Parsed as Bitcoin packet");
         return Some(Layer7Infos {
             layer_7_protocol: "Bitcoin".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::BitcoinPacket(bitcoin_packet)),
         });
     }
-
-    // If no known protocol is identified, return None
-    //println!("Unable to parse as any known protocol by the library");
 
     None
 }

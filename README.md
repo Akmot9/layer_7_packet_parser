@@ -1,152 +1,138 @@
-Sure! Here's a comprehensive README for your project, including sections for an introduction, setup, usage, testing, and contribution guidelines.
+# Layer 7 Packet Analyzer
 
----
+[![Crates.io](https://img.shields.io/crates/v/layer7_packet_analyzer.svg)](https://crates.io/crates/layer7_packet_analyzer)
+[![Documentation](https://docs.rs/layer7_packet_analyzer/badge.svg)](https://docs.rs/layer7_packet_analyzer)
 
-# Layer 7 Packet Parser
+## Overview
 
-This project is a Rust-based library for parsing various types of Layer 7 (application layer) network packets, including DHCP, DNS, HTTP, MODBUS, and TLS packets. It provides functionality to inspect the contents of these packets and extract useful information for network analysis and monitoring purposes.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Examples](#examples)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Introduction
-
-The Layer 7 Packet Parser library allows users to parse and inspect different types of application layer packets. This can be useful for network monitoring, security analysis, and debugging network applications. The library currently supports the following protocols:
-
-- DHCP
-- DNS
-- HTTP
-- MODBUS
-- TLS
+`layer7_packet_analyzer` is a Rust crate for parsing and analyzing various Layer 7 (application layer) network protocols. It supports protocols such as DNS, TLS, DHCP, HTTP, Modbus, NTP, and Bitcoin.
 
 ## Features
 
-- Parse DHCP packets
-- Parse DNS packets
-- Parse HTTP packets
-- Parse MODBUS packets
-- Parse TLS packets
-
-## Installation
-
-To use the Layer 7 Packet Parser library in your Rust project, add the following to your `Cargo.toml`:
-
-```toml
-[dependencies]
-layer_7_packet_parser = { git = "https://github.com/Akmot9/layer_7_packet_parser" }
-```
+- Parse and analyze Layer 7 network protocols.
+- Supports multiple protocols: DNS, TLS, DHCP, HTTP, Modbus, NTP, and Bitcoin.
+- Provides data structures and functions for easy packet analysis.
 
 ## Usage
 
-Here is an example of how to use the library to parse a packet:
+Add `layer7_packet_analyzer` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+layer7_packet_analyzer = "0.1.0"
+```
+
+### Example
+
+Here is a basic example of how to use this crate to parse Layer 7 packet information:
 
 ```rust
-extern crate layer_7_packet_parser;
+use layer7_packet_analyzer::parse_layer_7_infos;
 
-use layer_7_packet_parser::parse_layer_7_infos;
-
-fn main() {
-    let packet: Vec<u8> = vec![/* your packet data here */];
-    match parse_layer_7_infos(&packet) {
-        Some(layer_7_infos) => {
-            println!("Parsed Layer 7 Information: {}", layer_7_infos);
-        }
-        None => {
-            println!("Could not parse Layer 7 information.");
-        }
-    }
+let packet: &[u8] = &[/* raw packet data */];
+match parse_layer_7_infos(packet) {
+    Some(info) => println!("Parsed Layer 7 Info: {}", info),
+    None => println!("Unable to parse the packet."),
 }
 ```
+
+### Parsing Specific Protocols
+
+You can also parse specific protocols directly using the respective modules. Here's an example for parsing a TLS packet:
+
+```rust
+use layer7_packet_analyzer::packet::tls::{parse_tls_packet, TlsPacket};
+
+let tls_packet_data: &[u8] = &[/* raw TLS packet data */];
+match parse_tls_packet(tls_packet_data) {
+    Ok(tls_packet) => println!("Parsed TLS Packet: {:?}", tls_packet),
+    Err(e) => println!("Failed to parse TLS packet: {}", e),
+}
+```
+
+## Modules
+
+### `packet`
+
+The `packet` module contains submodules for each supported protocol. Each submodule provides the necessary functions to parse the protocol's packets and the data structures representing the parsed data.
+
+### Example Modules
+
+- `dns`: Functions and structures for parsing DNS packets.
+- `tls`: Functions and structures for parsing TLS packets.
+- `dhcp`: Functions and structures for parsing DHCP packets.
+- `http`: Functions and structures for parsing HTTP requests.
+- `modbus`: Functions and structures for parsing Modbus packets.
+- `ntp`: Functions and structures for parsing NTP packets.
+- `bitcoin`: Functions and structures for parsing Bitcoin packets.
+
+## Structs and Enums
+
+### `Layer7Info`
+
+Represents the possible layer 7 information that can be parsed.
+
+```rust
+use layer7_packet_analyzer::packet::{
+   bitcoin::{parse_bitcoin_packet, BitcoinPacket},
+   dhcp::{parse_dhcp_packet, DhcpPacket},
+   dns::{parse_dns_packet, DnsPacket},
+   http::{parse_http_request, HttpRequest},
+   modbus::{parse_modbus_packet, ModbusPacket},
+   ntp::{parse_ntp_packet, NtpPacket},
+   tls::{parse_tls_packet, TlsPacket},
+};
+
+#[derive(Debug)]
+pub enum Layer7Info {
+    DnsPacket(DnsPacket),
+    TlsPacket(TlsPacket),
+    DhcpPacket(DhcpPacket),
+    HttpRequest(HttpRequest),
+    ModbusPacket(ModbusPacket),
+    NtpPacket(NtpPacket),
+    BitcoinPacket(BitcoinPacket),
+    None,
+}
+```
+
+### `Layer7Infos`
+
+Contains information about the layer 7 protocol and its parsed data.
 
 ## Examples
 
-### Parsing a DNS Packet
+### Parse a TLS Packet
 
 ```rust
-extern crate layer_7_packet_parser;
+use layer7_packet_analyzer::parse_layer_7_infos;
 
-use layer_7_packet_parser::packet::dns::parse_dns_packet;
+let tls_payload = vec![22, 3, 3, 0, 5, 1, 2, 3, 4, 5]; // Example TLS payload
+let result = parse_layer_7_infos(&tls_payload);
 
-fn main() {
-    let dns_packet = vec![
-        0xdd, 0xc7, // Transaction ID
-        0x01, 0x00, // Flags
-        0x00, 0x01, // Questions
-        0x00, 0x00, // Answers
-        0x00, 0x00, // Authority RRs
-        0x00, 0x00, // Additional RRs
-        // Query
-        0x03, 0x77, 0x77, 0x77, // "www"
-        0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, // "google"
-        0x03, 0x63, 0x6f, 0x6d, // "com"
-        0x00, // Null terminator of the domain name
-        0x00, 0x01, // Type A
-        0x00, 0x01, // Class IN
-    ];
-
-    match parse_dns_packet(&dns_packet) {
-        Ok(dns) => println!("Parsed DNS Packet: {:?}", dns),
-        Err(_) => println!("Failed to parse DNS Packet"),
-    }
+match result {
+    Some(layer_7_infos) => println!("Parsed Info: {}", layer_7_infos),
+    None => println!("Failed to parse the packet."),
 }
 ```
 
-### Parsing an HTTP Request
+### Parse a DNS Packet
 
 ```rust
-extern crate layer_7_packet_parser;
+use layer7_packet_analyzer::parse_layer_7_infos;
 
-use layer_7_packet_parser::packet::http::parse_http_request;
+let dns_payload = vec![
+    0xdd, 0xc7, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x77, 0x77, 0x77,
+    0x06, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01
+]; // Example DNS payload
+let result = parse_layer_7_infos(&dns_payload);
 
-fn main() {
-    let http_request = b"GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n";
-    
-    match parse_http_request(http_request) {
-        Ok(request) => println!("Parsed HTTP Request: {:?}", request),
-        Err(_) => println!("Failed to parse HTTP Request"),
-    }
+match result {
+    Some(layer_7_infos) => println!("Parsed Info: {}", layer_7_infos),
+    None => println!("Failed to parse the packet."),
 }
 ```
-
-## Testing
-
-To run the tests for this project, use the following command:
-
-```bash
-cargo test
-```
-
-This will compile the project and run all the tests defined in the `tests` module.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute to the project:
-
-1. Fork the repository on GitHub.
-2. Create a new branch from the main branch.
-3. Make your changes and commit them to your branch.
-4. Push your changes to your fork.
-5. Open a pull request to the main repository.
-
-Please ensure that your code adheres to the Rust coding standards and passes all tests.
 
 ## License
 
-This project is licensed under either of
-
-- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
-
----
-
-Feel free to customize this README to better suit your project and preferences.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

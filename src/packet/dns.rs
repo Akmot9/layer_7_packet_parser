@@ -255,7 +255,7 @@ mod tests {
         let dns_payload = vec![0x10, 0x77, 0x77, 0x77];
         assert!(parse_dns_name(&dns_payload, 0).is_err());
     }
-    
+
     // #[test]
     // fn test_that_parse_dns_does_not_parse_ntp_packet_by_mistake() {
     //     // This is an example NTP packet

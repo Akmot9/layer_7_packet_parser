@@ -1,6 +1,6 @@
 [package]
 name = "parse_layer7"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Cyprien Avico <avicocyprien@yahoo.com>"]
 description = "A crate for parsing layer 7 packets comming from UDP OR TCP payloads."

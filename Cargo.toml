@@ -1,9 +1,9 @@
 [package]
 name = "parse_layer7"
-version = "0.1.6"
+version = "0.2.0"
 edition = "2021"
 authors = ["Cyprien Avico <avicocyprien@yahoo.com>"]
-description = "A crate for parsing layer 7 packets, specifically DNS packets."
+description = "A crate for parsing layer 7 packets comming from UDP OR TCP payloads."
 homepage = "https://github.com/Akmot9/layer_7_packet_parser"
 repository = "https://github.com/Akmot9/layer_7_packet_parser"
 documentation = "https://docs.rs/parse_layer7"

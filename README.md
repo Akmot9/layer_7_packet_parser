@@ -1,7 +1,7 @@
 # Layer 7 Packet Analyzer
 
-[![Crates.io](https://img.shields.io/crates/v/layer7_packet_analyzer.svg)](https://crates.io/crates/layer7_packet_analyzer)
-[![Documentation](https://docs.rs/layer7_packet_analyzer/badge.svg)](https://docs.rs/layer7_packet_analyzer)
+[![Crates.io](https://img.shields.io/crates/v/layer7_packet_analyzer.svg)](https://crates.io/crates/parse_layer7)
+[![Documentation](https://docs.rs/layer7_packet_analyzer/badge.svg)](https://docs.rs/parse_layer7/latest/parse_layer7)
 
 ## Overview
 

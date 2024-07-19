@@ -317,7 +317,10 @@ mod tests {
             let query = &dns_packet.queries.queries[0];
             assert_eq!(query.name, "www.google.com");
             assert_eq!(query.qtype, detect_dns_packet::utils::dns_types::DnsType(1));
-            assert_eq!(query.qclass, detect_dns_packet::utils::dns_class::DnsClass(1));
+            assert_eq!(
+                query.qclass,
+                detect_dns_packet::utils::dns_class::DnsClass(1)
+            );
         } else {
             panic!("Expected Layer7Info::DnsPacket");
         }

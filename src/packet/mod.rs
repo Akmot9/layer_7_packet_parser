@@ -6,7 +6,6 @@
 //!
 //! - [`bitcoin`]: Contains functions and structures for parsing Bitcoin protocol packets.
 //! - [`dhcp`]: Contains functions and structures for parsing DHCP protocol packets.
-//! - [`dns`]: Contains functions and structures for parsing DNS protocol packets.
 //! - [`http`]: Contains functions and structures for parsing HTTP protocol requests.
 //! - [`modbus`]: Contains functions and structures for parsing Modbus protocol packets.
 //! - [`ntp`]: Contains functions and structures for parsing NTP protocol packets.
@@ -14,7 +13,6 @@
 
 pub mod bitcoin;
 pub mod dhcp;
-pub mod dns;
 pub mod http;
 pub mod modbus;
 pub mod ntp;

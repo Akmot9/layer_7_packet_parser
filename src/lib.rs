@@ -48,7 +48,6 @@
 //! use parse_layer7::packet::{
 //!    bitcoin::{parse_bitcoin_packet, BitcoinPacket},
 //!    dhcp::{parse_dhcp_packet, DhcpPacket},
-//!    dns::{parse_dns_packet, DnsPacket},
 //!    http::{parse_http_request, HttpRequest},
 //!    modbus::{parse_modbus_packet, ModbusPacket},
 //!    ntp::{parse_ntp_packet, NtpPacket},
@@ -57,7 +56,6 @@
 //!
 //! #[derive(Debug)]
 //! pub enum Layer7Info {
-//!     DnsPacket(DnsPacket),
 //!     TlsPacket(TlsPacket),
 //!     DhcpPacket(DhcpPacket),
 //!     HttpRequest(HttpRequest),
@@ -136,12 +134,13 @@ use std::fmt::{self};
 use crate::packet::{
     bitcoin::{parse_bitcoin_packet, BitcoinPacket},
     dhcp::{parse_dhcp_packet, DhcpPacket},
-    dns::{parse_dns_packet, DnsPacket},
     http::{parse_http_request, HttpRequest},
     modbus::{parse_modbus_packet, ModbusPacket},
     ntp::{parse_ntp_packet, NtpPacket},
     tls::{parse_tls_packet, TlsPacket},
 };
+
+use detect_dns_packet::DnsPacket;
 
 /// `Layer7Info` represents the possible layer 7 information that can be parsed.
 #[derive(Debug)]
@@ -221,7 +220,7 @@ pub fn parse_layer_7_infos(packet: &[u8]) -> Option<Layer7Infos> {
     }
 
     // Attempt to parse as a DNS packet
-    if let Ok(dns_packet) = parse_dns_packet(packet) {
+    if let Ok(dns_packet) = DnsPacket::try_from(packet) {
         return Some(Layer7Infos {
             layer_7_protocol: "DNS".to_string(),
             layer_7_protocol_infos: Some(Layer7Info::DnsPacket(dns_packet)),

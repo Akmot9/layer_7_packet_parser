@@ -307,17 +307,17 @@ mod tests {
         let layer_7_infos = result.unwrap();
         assert_eq!(layer_7_infos.layer_7_protocol, "DNS".to_string());
         if let Some(Layer7Info::DnsPacket(dns_packet)) = layer_7_infos.layer_7_protocol_infos {
-            assert_eq!(dns_packet.transaction_id, 0xddc7);
-            assert_eq!(dns_packet.flags, 0x0100);
-            assert_eq!(dns_packet.questions, 1);
-            assert_eq!(dns_packet.answers, 0);
-            assert_eq!(dns_packet.authority_rrs, 0);
-            assert_eq!(dns_packet.additional_rrs, 0);
-            assert_eq!(dns_packet.queries.len(), 1);
-            let query = &dns_packet.queries[0];
+            assert_eq!(dns_packet.header.transaction_id, 0xddc7);
+            assert_eq!(dns_packet.header.flags, 0x0100);
+            assert_eq!(dns_packet.header.counts[0], 1);
+            assert_eq!(dns_packet.header.counts[1], 0);
+            assert_eq!(dns_packet.header.counts[2], 0);
+            assert_eq!(dns_packet.header.counts[3], 0);
+            assert_eq!(dns_packet.queries.queries.len(), 1);
+            let query = &dns_packet.queries.queries[0];
             assert_eq!(query.name, "www.google.com");
-            assert_eq!(query.query_type, 1);
-            assert_eq!(query.query_class, 1);
+            assert_eq!(query.qtype, detect_dns_packet::utils::dns_types::DnsType(1));
+            assert_eq!(query.qclass, detect_dns_packet::utils::dns_class::DnsClass(1));
         } else {
             panic!("Expected Layer7Info::DnsPacket");
         }

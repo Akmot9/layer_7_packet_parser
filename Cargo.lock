@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "detect_dns_packet"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bca108895ecb5a19fa322322dde80acdc0dae577d8d5f1d1aa9a7c3ff8987107"
+checksum = "1a598892d43e3c52dfd496fb1231f33f43897c225bf38ed69e6a921739b2941f"
 dependencies = [
  "hex",
 ]

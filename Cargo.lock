@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "detect_dns_packet"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50cc181d64965774b139616f14ca932b096d4854d97a93a5814209d47ba7b2fb"
+checksum = "eeb3566f723777805756c6d06526e5886ea1f608493e59fcd68cd476415e90d3"
 dependencies = [
  "hex",
  "thiserror",
@@ -32,7 +32,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "parse_layer7"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "detect_dns_packet",
  "serde",
